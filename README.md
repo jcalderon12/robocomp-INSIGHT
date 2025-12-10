@@ -1,1 +1,81 @@
-# Robocomp-IINSIGHT
+# roboComp-INSIGHT
+
+## 1. Project introduction
+
+This repository is intended for the code related to the INSIGHT project. This project, carried out by different universities across Spain, aims to enable a robot to identify objects in its environment that could pose an obstacle to its proper functioning.
+
+To achieve this functionality, different Agents have been developed that carry out a task flow as explained below:
+
+#### Basic mission
+
+The Mission Control Agent establishes the mission to follow a person. For this, the Agent sets the robot's position **(with respect to the room?)** in the working memory, as well as the IMU measurements of the robot itself.
+
+#### Internal simulation
+
+The same Mission Control Agent also carries out an internal simulation to represent what the robot believes the robot is going to do and to be able to sense when the real robot has not had the expected behavior, which implies that it has encountered some kind of obstacle to its mission.
+
+#### Robot knowledge - Ontologies
+
+### TODO
+
+#### Simulation of problematic events
+
+When the robot finds that its behavior in the simulation has not been the same as the behavior in the real world, it generates different causes based on what it knows. Once the list of possible causes is established, the Mission Control Agent stops the mission to try to simulate the possible causes to try and find the real cause of the problem.
+
+#### Obstacle detection
+
+Once the cause of the problem is detected, the robot will try to build a detector for the obstacle it has encountered, so that it does not pose a problem for it again in the future.
+
+
+## 2. Environment and dependencies
+
+### Main libraries
+* **RoboComp**: Robotics framework created at Robolab
+* **Webots**: Real-time physics simulation 
+* **PyBullet**: Real-time physics simulation
+* **NumPy**: Numerical operations
+* **SciPy**: Scientific computing
+* **Pandas**: Data manipulation
+* **Matplotlib**: Data visualization
+
+## 3. Installation
+
+### RoboComp installation
+
+Download and execute the installation script:
+
+```bash
+wget https://raw.githubusercontent.com/robocomp/robocomp/development/robocomp_install.sh && bash robocomp_install.sh
+```
+
+Install the necessary repositories:
+
+```bash
+vcs import $ROBOCOMP/componets < insight.repos --recursive
+```
+### Python packages
+
+Create the project folder and clone the repository:
+
+```bash
+mkdir -p ~/software
+cd ~/software
+git clone <URL_DEL_REPOSITORIO>
+cd <nombre_del_repositorio>
+```
+
+Generate a virtual environment to avoid incompatibilities:
+
+```bash
+python -m venv insight_env
+source insight_env/bin/activate  
+pip install pybullet numpy scipy pandas matplotlib
+```
+
+## 4. Usage
+
+To launch all the enviroment just execute the scrypt:
+
+```bash
+
+```

@@ -37,6 +37,7 @@ Once the cause of the problem is detected, the robot will try to build a detecto
 * **SciPy**: Scientific computing
 * **Pandas**: Data manipulation
 * **Matplotlib**: Data visualization
+* **Program-manager**: Monitoring the execution process
 
 ## 3. Installation
 
@@ -55,27 +56,42 @@ vcs import $ROBOCOMP/componets < insight.repos --recursive
 ```
 ### Python packages
 
-Create the project folder and clone the repository:
+Install the dependencies from the requirements file:
 
+```bash
+pip install -r requirements.txt
+```
+
+### Program manager installation and configuration
+
+Clone the repository in the software dir:
 ```bash
 mkdir -p ~/software
 cd ~/software
-git clone <URL_DEL_REPOSITORIO>
-cd <nombre_del_repositorio>
+git clone https://github.com/alfiTH/Program-manager.git
 ```
 
-Generate a virtual environment to avoid incompatibilities:
-
+Create a SSL certificate necesary to this software:
 ```bash
-python -m venv insight_env
-source insight_env/bin/activate  
-pip install pybullet numpy scipy pandas matplotlib
+cd ~/software/Program-manager/certificates
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes
+```
+
+Create a new user (**This user must be used in the future to login in the software.**):
+```bash
+cd ~/software/Program-manager
+python src/utils/addUser.py
+```
+
+Copy the config file from the INSIGHT project:
+```bash
+cp $ROBOCOMP/components/robocomp-INSIGHT/insight_config.json ~/software/Program-manager/etc/
 ```
 
 ## 4. Usage
 
-To launch all the enviroment just execute the scrypt:
+To launch all the enviroment just execute Program manager with the INSIGHT configuration file:
 
 ```bash
-
+python ~/software/Program-manager/src/ProgramManager.py --config etc/insight_config.json
 ```

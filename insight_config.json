@@ -1,0 +1,52 @@
+[
+    {
+      "name": "webots",
+      "directory": ".",
+      "command": "webots"
+    },
+    {
+      "name": "rcnode",
+      "directory": ".",
+      "command": "bash $ROBOCOMP/tools/rcnode/rcnode.sh"
+    },
+    {
+      "name": "bridge",
+      "directory": "$ROBOCOMP/components/webots-bridge",
+      "command": "bin/Webots2Robocomp etc/config"
+    },
+    {
+      "name": "lidar",
+      "directory": "$ROBOCOMP/components/robocomp-robolab/components/hardware/laser/lidar3D",
+      "command": "bin/Lidar3D etc/config_helios_webots "
+    },
+    {
+      "name": "viewer",
+      "directory": "$ROBOCOMP/components/robocomp-robolab/components/viewers/lidar3d_viewer",
+      "command": "bin/lidar3dviewer etc/config_helios "
+    },
+    {
+        "name": "mission_controller",
+        "directory": "$ROBOCOMP/components/robocomp-INSIGHT/agents/mission_controller",
+        "command": "bin/mission_controller etc/config"
+    },
+    {
+        "name": "inner_simulator",
+        "directory": "$ROBOCOMP/components/robocomp-INSIGHT/agents/inner_simulator",
+        "command": "bin/inner_simulator etc/config"
+    },
+    {
+        "name": "concept_robot",
+        "directory": "$ROBOCOMP/components/robocomp-INSIGHT/agents/concept_robot",
+        "command": "bin/concept_robot etc/config"
+    },
+    {
+        "name": "concept_bottle",
+        "directory": "$ROBOCOMP/components/robocomp-INSIGHT/agents/concept_bottle",
+        "command": "bin/concept_bottle etc/config"
+    },
+    {
+        "name": "concept_person",
+        "directory": "$ROBOCOMP/components/robocomp-INSIGHT/agents/concept_person",
+        "command": "bin/concept_person etc/config"
+    }
+  ]

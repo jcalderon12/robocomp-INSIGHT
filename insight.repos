@@ -15,3 +15,7 @@ repositories:
     type: git
     url: https://github.com/robocomp/robocomp-robolab.git
     version: master
+  robocomp_insight:
+    type: git
+    url: https://github.com/jcalderon12/robocomp-INSIGHT.git
+    version: main

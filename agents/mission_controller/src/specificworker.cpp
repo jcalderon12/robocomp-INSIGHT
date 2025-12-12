@@ -87,6 +87,14 @@ void SpecificWorker::initialize()
 	graph_viewer = std::make_unique<DSR::DSRViewer>(this, G, current_opts, main);
 	//graph_viewer->add_custom_widget_to_dock("CustomWidget", &custom_widget);
 
+	mission_controller_ui.setupUi(&mission_controller_widget);
+
+	connect(mission_controller_ui.set_button, &QPushButton::clicked, this, &SpecificWorker::on_setMission_clicked);
+	connect(mission_controller_ui.start_button, &QPushButton::clicked, this, &SpecificWorker::on_startMission_clicked);
+	connect(mission_controller_ui.stop_button, &QPushButton::clicked, this, &SpecificWorker::on_stopMission_clicked);
+
+	graph_viewer->add_custom_widget_to_dock("Mission_controller", &mission_controller_widget);
+
     //initializeCODE
 
     /////////GET PARAMS, OPEND DEVICES....////////
@@ -99,20 +107,7 @@ void SpecificWorker::initialize()
 
 void SpecificWorker::compute()
 {
-    std::cout << "Compute worker" << std::endl;
-	//computeCODE
-	//try
-	//{
-	//  camera_proxy->getYImage(0,img, cState, bState);
-    //    if (img.empty())
-    //        emit goToEmergency()
-	//  memcpy(image_gray.data, &img[0], m_width*m_height*sizeof(uchar));
-	//  searchTags(image_gray);
-	//}
-	//catch(const Ice::Exception &e)
-	//{
-	//  std::cout << "Error reading from Camera" << e << std::endl;
-	//}
+    
 }
 
 
@@ -145,5 +140,26 @@ int SpecificWorker::startup_check()
 	return 0;
 }
 
+void SpecificWorker::on_setMission_clicked()
+{
+	QString mission_name = mission_controller_ui.mission_selector->currentText();
+	std::cout << "Mission selected: " << mission_name.toStdString() << std::endl;
+
+	//on_setMission_clickedCODE
+}
+
+void SpecificWorker::on_startMission_clicked()
+{
+	std::cout << "Starting mission" << std::endl;
+
+	//on_startMission_clickedCODE
+}
+
+void SpecificWorker::on_stopMission_clicked()
+{
+	std::cout << "Stoping mission" << std::endl;
+
+	//on_stopMission_clickedCODE
+}
 
 

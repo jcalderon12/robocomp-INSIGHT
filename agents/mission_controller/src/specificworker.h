@@ -32,6 +32,7 @@
 //#define HIBERNATION_ENABLED
 
 #include <genericworker.h>
+#include "ui_mission_controller.h"
 
 
 /**
@@ -53,7 +54,6 @@ public:
      * \brief Destructor for SpecificWorker.
      */
 	~SpecificWorker();
-
 
 public slots:
 
@@ -83,6 +83,19 @@ public slots:
      */
 	int startup_check();
 
+	/**
+	 * \brief Slot triggered when the "Stop Mission" button is clicked.
+	 */
+	void on_stopMission_clicked();
+	/**
+	 * \brief Slot triggered when the "Set Mission" button is clicked.
+	 */
+	void on_setMission_clicked();
+	/**
+	 * \brief Slot triggered when the "Start Mission" button is clicked.
+	 */
+	void on_startMission_clicked();
+
 	void modify_node_slot(std::uint64_t, const std::string &type){};
 	void modify_node_attrs_slot(std::uint64_t id, const std::vector<std::string>& att_names){};
 	void modify_edge_slot(std::uint64_t from, std::uint64_t to,  const std::string &type){};
@@ -95,6 +108,10 @@ private:
      * \brief Flag indicating whether startup checks are enabled.
      */
 	bool startup_check_flag;
+
+	Ui::mission_controller mission_controller_ui;
+	QWidget mission_controller_widget;
+
 
 signals:
 	//void customSignal();

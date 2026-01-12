@@ -52,7 +52,7 @@ wget https://raw.githubusercontent.com/robocomp/robocomp/development/robocomp_in
 Install the necessary repositories:
 
 ```bash
-vcs import $ROBOCOMP/componets < insight.repos --recursive
+vcs import $ROBOCOMP/components < insight.repos --recursive
 ```
 ### Python packages
 

@@ -179,16 +179,30 @@ void SpecificWorker::on_setMission_clicked()
 
 void SpecificWorker::on_startMission_clicked()
 {
-	std::cout << "Starting mission" << std::endl;
-
-	//on_startMission_clickedCODE
+	if (std::optional<DSR::Node> optional_node = G->get_node("follow_me"); optional_node.has_value())
+	{	
+		DSR::Node follow_me_node = optional_node.value();
+		G->add_or_modify_attrib_local<aff_interacting_att>(follow_me_node, true);
+		G->update_node(follow_me_node);
+		std::cout << "Affordance activated." << std::endl;
+	}
+	else{
+		std::cout << "Follow me affordance node not found in DSR." << std::endl;
+	}
 }
 
 void SpecificWorker::on_stopMission_clicked()
 {
-	std::cout << "Stoping mission" << std::endl;
-
-	//on_stopMission_clickedCODE
+	if (std::optional<DSR::Node> optional_node = G->get_node("follow_me"); optional_node.has_value())
+	{	
+		DSR::Node follow_me_node = optional_node.value();
+		G->add_or_modify_attrib_local<aff_interacting_att>(follow_me_node, false);
+		G->update_node(follow_me_node);
+		std::cout << "Affordance stopped." << std::endl;
+	}
+	else{
+		std::cout << "Follow me affordance node not found in DSR." << std::endl;
+	}
 }
 
 

@@ -246,15 +246,66 @@ void SpecificWorker::create_affordance()
 	affordance_edge.to(affordance_node.id());
 	affordance_edge.type("has_intention");
 	G->insert_or_assign_edge(affordance_edge);
+	std::cout << "Waiting for affordance acceptance..." << std::endl;
 }
 
 bool SpecificWorker::check_affordance_accepted()
 {
-	return true;
+	if (auto optional_node = G->get_node("follow_me"); !optional_node.has_value()){
+		std::cout << "Affordance node not found in DSR." << std::endl;
+		return false;
+	}
+	else{
+		DSR::Node affordance_node = optional_node.value();
+		auto interacting = G->get_attrib_by_name<aff_interacting_att>(affordance_node.id());
+		if (interacting.has_value() && interacting.value() == true){
+			std::cout << "Affordance accepted for the assigned target." << std::endl;
+			return true;
+		}
+		else
+			return false;
+	}
 }
 
 std::string SpecificWorker::follow_person()
-{
+{	
+	auto optional_robot_node = G->get_node("robot");
+	if (!optional_robot_node.has_value()){
+		std::cout << "Robot node not found in DSR." << std::endl;
+		return "FAILED";
+	}
+
+	auto optional_person_node = G->get_node("person");
+	if (!optional_person_node.has_value()){
+		std::cout << "Person node not found in DSR." << std::endl;
+		return "FAILED";
+	}
+
+	auto optional_affordance_node = G->get_node("follow_me");
+	if (!optional_affordance_node.has_value()){
+		std::cout << "Affordance node not found in DSR." << std::endl;
+		return "FAILED";
+	}
+
+	auto robot_node = optional_robot_node.value();
+	auto person_node = optional_person_node.value();
+	auto affordance_node = optional_affordance_node.value();
+
+	auto interacting = G->get_attrib_by_name<aff_interacting_att>(affordance_node.id());
+	if (!interacting.has_value() || interacting.value() == false){
+		std::cout << "Affordance interaction stopped by user." << std::endl;
+		G->add_or_modify_attrib_local<robot_ref_adv_speed_att>(robot_node, (float)0.0);
+		G->add_or_modify_attrib_local<robot_ref_rot_speed_att>(robot_node, (float)0.0);
+		G->update_node(robot_node);
+		G->update_node(robot_node);
+		return "STOPPED";
+	}
+
+	std::cout << "Following person with id: " << person_node.id() << std::endl;
+
+	G->add_or_modify_attrib_local<robot_ref_adv_speed_att>(robot_node, (float)0.2);
+	G->update_node(robot_node);
+
 	return "RUNNING";
 }
 

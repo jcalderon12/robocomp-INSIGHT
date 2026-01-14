@@ -255,10 +255,10 @@ class SpecificWorker(GenericWorker):
         robot_nodes = self.g.get_nodes_by_type("robot")
         if len(robot_nodes) > 0:
             robot_node = robot_nodes[0]
-            if robot_node.attrs["forward_velocity"].value is not None:
-                forward_velocity = robot_node.attrs["forward_velocity"].value
-            if robot_node.attrs["angular_velocity"].value is not None:
-                angular_velocity = robot_node.attrs["angular_velocity"].value
+            if robot_node.attrs["robot_ref_adv_speed"].value is not None:
+                forward_velocity = robot_node.attrs["robot_ref_adv_speed"].value
+            if robot_node.attrs["robot_ref_rot_speed"].value is not None:
+                angular_velocity = robot_node.attrs["robot_ref_rot_speed"].value
 
         return forward_velocity, angular_velocity
 

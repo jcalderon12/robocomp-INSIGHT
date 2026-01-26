@@ -27,6 +27,9 @@
 #ifndef SPECIFICWORKER_H
 #define SPECIFICWORKER_H
 
+#define WEBOTS_MAX_LINEAR_SPEED 1.5 //meters per second
+#define WEBOTS_MAX_ANGULAR_SPEED 4.03 //radians per second 
+
 
 // If you want to reduce the period automatically due to lack of use, you must uncomment the following line
 //#define HIBERNATION_ENABLED
@@ -134,7 +137,7 @@ public slots:
 	 * \brief Follows the assigned person.
 	 * \return A string indicating the state of the follow operation ("RUNNING", "SUCCESS", "FAILED", "STOPPED").
 	 */
-	std::string follow_person();
+	std::string follow_person(std::vector<float> distance);
 
 	/**
 	 * \brief Calculate the cartesian distance between the robot and the person
@@ -144,8 +147,16 @@ public slots:
 
 	/**
 	 * \brief Update the distance between the robot and the person in the DSR
+	 * \param distance The distance between the robot and the person
 	 */
 	void update_distance_to_person(std::vector<float> distance);
+
+	/**
+	 * \brief Calculate the speed that the robot must have to reach the person
+	 * \param distance The distance between the robot and the person
+	 * \return The speed calculated like a proporcional controller
+	 */
+	float calculate_linear_speed_from_distance(std::vector<float> distance);
 
 private:
 

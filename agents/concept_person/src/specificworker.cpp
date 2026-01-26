@@ -109,7 +109,7 @@ void SpecificWorker::compute()
 	}
 
 	case States::FOLLOWME:{
-		auto state = follow_person();
+		auto state = follow_person(distance_to_person);
 		if (state == "RUNNING")
 			break;
 		else {
@@ -174,10 +174,30 @@ std::vector<float> SpecificWorker::get_distance_to_person()
 	RoboCompWebots2Robocomp::ObjectPose robot_pose = this->webots2robocomp_proxy->getObjectPose(robot_def);
 
 	return {
-		person_pose.position.x-robot_pose.position.x,
-		person_pose.position.y-robot_pose.position.y,
-		person_pose.position.z-robot_pose.position.z
+		(person_pose.position.x-robot_pose.position.x)/1000,
+		(person_pose.position.y-robot_pose.position.y)/1000,
+		(person_pose.position.z-robot_pose.position.z)/1000
 	};
+}
+
+float SpecificWorker::calculate_linear_speed_from_distance(std::vector<float> distance)
+{
+	const float min_distance = 1.0;
+	const float K = 100;
+
+	const float distance_2d = std::sqrt(
+		distance[0] * distance[0] + 
+		distance[1] * distance[1] +
+		distance[2] * distance[2]
+	);
+
+	if(distance_2d <= min_distance){
+		return 0.0;
+	}
+
+	float error = distance_2d - min_distance;
+
+	return WEBOTS_MAX_LINEAR_SPEED * std::tanh(K * error);
 }
 
 /************ DSR Methods *************/
@@ -296,7 +316,7 @@ void SpecificWorker::update_distance_to_person(std::vector<float> distance)
 	rt->insert_or_assign_edge_RT(robot_node,person_node.id(),distance, {0.f, 0.f, 0.f});
 }
 
-std::string SpecificWorker::follow_person()
+std::string SpecificWorker::follow_person(std::vector<float> distance)
 {	
 	auto optional_robot_node = G->get_node("robot");
 	if (!optional_robot_node.has_value()){
@@ -332,7 +352,9 @@ std::string SpecificWorker::follow_person()
 
 	std::cout << "Following person with id: " << person_node.id() << std::endl;
 
-	G->add_or_modify_attrib_local<robot_ref_adv_speed_att>(robot_node, (float)1.0);
+	auto linear_speed = calculate_linear_speed_from_distance(distance);
+
+	G->add_or_modify_attrib_local<robot_ref_adv_speed_att>(robot_node, (float)linear_speed);
 	G->update_node(robot_node);
 
 	return "RUNNING";

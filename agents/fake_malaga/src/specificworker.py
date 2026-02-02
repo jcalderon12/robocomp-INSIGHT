@@ -28,6 +28,11 @@ import interfaces as ifaces
 sys.path.append('/opt/robocomp/lib')
 console = Console(highlight=False)
 
+dir_name = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(dir_name)
+sys.path.append(parent_dir + "/src/")
+console = Console(highlight=False)
+
 from pydsr import *
 
 

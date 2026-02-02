@@ -28,6 +28,11 @@ import interfaces as ifaces
 sys.path.append('/opt/robocomp/lib')
 console = Console(highlight=False)
 
+dir_name = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(dir_name)
+sys.path.append(parent_dir + "/src/")
+console = Console(highlight=False)
+
 from pydsr import *
 
 
@@ -35,7 +40,7 @@ class SpecificWorker(GenericWorker):
     def __init__(self, proxy_map, configData, startup_check=False):
         super(SpecificWorker, self).__init__(proxy_map, configData)
         self.Period = configData["Period"]["Compute"]
-
+        
         try:
             signals.connect(self.g, signals.UPDATE_NODE_ATTR, self.update_node_att)
             signals.connect(self.g, signals.UPDATE_NODE, self.update_node)

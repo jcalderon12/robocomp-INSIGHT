@@ -48,16 +48,12 @@ console = Console(highlight=False)
 from pydsr import *
 
 from pybullet_imu import IMU
-from dsr_gui import DSRViewer, View
 
 
 class SpecificWorker(GenericWorker):
     def __init__(self, proxy_map, configData, startup_check=False):
         super(SpecificWorker, self).__init__(proxy_map, configData)
         self.Period = configData["Period"]["Compute"]
-
-        self.dsr_viewer = DSRViewer(self, self.g, View.graph + View.scene, View.graph)
-        self.dsr_viewer.window.resize(1000, 600)
 
         try:
             signals.connect(self.g, signals.UPDATE_NODE_ATTR, self.update_node_att)

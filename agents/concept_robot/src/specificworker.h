@@ -32,6 +32,8 @@
 //#define HIBERNATION_ENABLED
 
 #include <genericworker.h>
+#include <vector>
+#include <cmath>
 
 
 /**
@@ -85,7 +87,16 @@ public slots:
      */
 	int startup_check();
 
+	/**
+	 * \brief Obtain target velocities from the robot node on the DSR graph.
+	 * \return A vector of two elements, the forward velocity and the angular velocity.
+	 */
 	std::vector<float> getVelocitiesFromDSR();
+
+	/**
+	 * \brief Create the imu node or updated it in the DSR graph. 
+	 * If the IMU measurement its the same from the last call of this method, it dont do nothing 
+	 */
 	void update_or_create_imu_node();
 
 	void modify_node_slot(std::uint64_t, const std::string &type){};
@@ -100,6 +111,9 @@ private:
      * \brief Flag indicating whether startup checks are enabled.
      */
 	bool startup_check_flag;
+
+	std::vector<float> last_acceleration_measurement;
+	std::vector<float> last_angular_velocity_measurement;
 
 signals:
 	//void customSignal();

@@ -89,8 +89,6 @@ void SpecificWorker::initialize()
 	graph_viewer = std::make_unique<DSR::DSRViewer>(this, G, current_opts, main);
 	//graph_viewer->add_custom_widget_to_dock("CustomWidget", &custom_widget);
 
-    //initializeCODE
-
     /////////GET PARAMS, OPEND DEVICES....////////
     //int period = configLoader.get<int>("Period.Compute") //NOTE: If you want get period of compute use getPeriod("compute")
     //std::string device = configLoader.get<std::string>("Device.name") 
@@ -105,8 +103,6 @@ void SpecificWorker::compute()
 	std::vector<float> velocities = getVelocitiesFromDSR();
 	this->omnirobot_proxy->setSpeedBase(0.0, velocities[0], velocities[1]);
 	update_or_create_imu_node();
-
-
 
 }
 
@@ -140,6 +136,8 @@ int SpecificWorker::startup_check()
 	return 0;
 }
 
+#pragma region DSR
+
 std::vector<float> SpecificWorker::getVelocitiesFromDSR()
 {
 	std::vector<float> velocities = {0.0, 0.0}; // {advx, rot}
@@ -164,6 +162,19 @@ std::vector<float> SpecificWorker::getVelocitiesFromDSR()
 	return velocities;
 }
 
+inline bool not_all_close(const std::vector<float>& a,
+                          const std::vector<float>& b,
+                          double atol=0.001)
+{
+    if (a.size() != b.size()) return true; // o false, según tu lógica
+
+    for (size_t i = 0; i < a.size(); ++i) {
+        if (std::abs(a[i] - b[i]) <= atol) {
+            return false;
+        }
+    }
+    return true;
+}
 
 void SpecificWorker::update_or_create_imu_node()
 {
@@ -176,9 +187,15 @@ void SpecificWorker::update_or_create_imu_node()
 	if (auto imu_node_opt = G->get_node("imu"); imu_node_opt.has_value())
 	{
 		auto imu_real_node = imu_node_opt.value();
-		G->add_or_modify_attrib_local<imu_accelerometer_att>(imu_real_node, acceleration);
-		G->add_or_modify_attrib_local<imu_gyroscope_att>(imu_real_node, angularVel);
-		G->update_node(imu_real_node);
+		if(not_all_close(last_acceleration_measurement, acceleration) 
+		or not_all_close(last_angular_velocity_measurement, angularVel)){
+			G->add_or_modify_attrib_local<imu_accelerometer_att>(imu_real_node, acceleration);
+			G->add_or_modify_attrib_local<imu_gyroscope_att>(imu_real_node, angularVel);
+			G->update_node(imu_real_node);
+
+			last_acceleration_measurement = acceleration;
+			last_angular_velocity_measurement = angularVel;
+		}
 	}
 	else
 	{
@@ -206,7 +223,6 @@ void SpecificWorker::update_or_create_imu_node()
 		G->insert_node(imu_node);
 		G->update_node(imu_node);
 	
-		
 		DSR::Edge imu_edge;
 		imu_edge.from(robot_node.id());
 		imu_edge.to(imu_node.id());
@@ -215,11 +231,9 @@ void SpecificWorker::update_or_create_imu_node()
 	
 	}
 
-
-
-
-
 }
+
+#pragma endregion DSR
 
 //SUBSCRIPTION to newFullPose method from FullPoseEstimationPub interface
 void SpecificWorker::FullPoseEstimationPub_newFullPose(RoboCompFullPoseEstimation::FullPoseEuler pose)

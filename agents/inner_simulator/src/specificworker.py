@@ -25,6 +25,7 @@ from rich.console import Console
 from genericworker import *
 import interfaces as ifaces
 
+
 import pybullet as p
 import numpy as np
 import locale
@@ -47,12 +48,16 @@ console = Console(highlight=False)
 from pydsr import *
 
 from pybullet_imu import IMU
+from dsr_gui import DSRViewer, View
 
 
 class SpecificWorker(GenericWorker):
     def __init__(self, proxy_map, configData, startup_check=False):
         super(SpecificWorker, self).__init__(proxy_map, configData)
         self.Period = configData["Period"]["Compute"]
+
+        self.dsr_viewer = DSRViewer(self, self.g, View.graph + View.scene, View.graph)
+        self.dsr_viewer.window.resize(1000, 600)
 
         try:
             signals.connect(self.g, signals.UPDATE_NODE_ATTR, self.update_node_att)
@@ -135,6 +140,8 @@ class SpecificWorker(GenericWorker):
         # ====================================================
 
         self.imu = IMU(self.robot, self.dt)
+        self.last_imu_measurement = self.imu.get_measurement()
+        self.publish_imu_to_dsr(self.last_imu_measurement[0], self.last_imu_measurement[1])
 
 
     def __del__(self):
@@ -144,9 +151,12 @@ class SpecificWorker(GenericWorker):
     @QtCore.Slot()
     def compute(self):
         self.show_compute_time_step()
-        acc_measured, angular_vel = self.imu.get_measurement()
-       
-        self.publish_imu_to_dsr(acc_measured, angular_vel)
+        actual_imu_measurement = self.imu.get_measurement()
+
+        if (not np.allclose(self.last_imu_measurement[0], actual_imu_measurement[0], atol=0.001) 
+            and 
+            not np.allclose(self.last_imu_measurement[1], actual_imu_measurement[1], atol=0.001)):
+            self.publish_imu_to_dsr(actual_imu_measurement[0], actual_imu_measurement[1])
 
         p.stepSimulation()
         match self.state:
@@ -179,7 +189,7 @@ class SpecificWorker(GenericWorker):
         """
         time_step = time.time() - self.actual_time
         self.actual_time = time.time()
-        if time.time() - self.print_time > 2:
+        if time.time() - self.print_time > 5:
             self.print_time = time.time()
             console.print(f"Compute frequency: {1/time_step:.2f} Hz", style="bold blue")
             

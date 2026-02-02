@@ -5,7 +5,7 @@
 
 
 # Change id
-Agent.id = 0
+Agent.id = 6
 Agent.name = "fake_castilla_la_mancha"
 Agent.configFile = ""
 

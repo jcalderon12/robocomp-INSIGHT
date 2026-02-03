@@ -90,7 +90,7 @@ python src/utils/addUser.py
 
 Copy the config file from the INSIGHT project:
 ```bash
-cp $ROBOCOMP/components/robocomp-INSIGHT/insight_config.json ~/software/Program-manager/etc/
+cp $ROBOCOMP/components/robocomp-insight/insight_config.json ~/software/Program-manager/etc/
 ```
 
 ## 4. Usage

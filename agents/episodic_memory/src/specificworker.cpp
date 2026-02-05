@@ -134,28 +134,96 @@ int SpecificWorker::startup_check()
 	return 0;
 }
 
-
 void SpecificWorker::modify_node_slot(std::uint64_t id, const std::string &type){
-
-	std::cout << "Modify node slot" << std::endl;
-}
-void SpecificWorker::modify_node_attrs_slot(std::uint64_t id, const std::vector<std::string>& att_names){
+	const auto time_now = std::chrono::system_clock::now();
+	auto new_timestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(time_now.time_since_epoch()).count();
 	
-	std::cout << "Modify node attrs slot" << std::endl;
+	if (!string_check_flag) {
+		std::cout << "Modify node slot - id: " << id << " type: " << type << " ";
+		std::cout << "new_timestamp: " << new_timestamp << std::endl;
+	}
+	else { 
+		auto optional_node = G->get_node(id);
+		if (!optional_node.has_value()){
+			std::cout << __FUNCTION__ << " - optional_node has no value"; return; }
+
+		auto node = optional_node.value();
+		std::cout << __FUNCTION__ << " - " << new_timestamp << "#MN%" << id << "%" << type << "%" << node.name() << std::endl;
+	}			
 }
+
+void SpecificWorker::modify_node_attrs_slot(std::uint64_t id, const std::vector<std::string>& att_names){
+	const auto time_now = std::chrono::system_clock::now();
+	auto new_timestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(time_now.time_since_epoch()).count();
+	
+	if (!string_check_flag) {std::cout << "Modify node attrs slot - id: " << id << " att_names_size: " << att_names.size() << " att_names: ";
+	for (const auto &att : att_names){ 
+		std::cout << att << " "; 
+		auto node_optional = G->get_node(id);
+		if (node_optional.has_value())
+		{	
+			auto node = node_optional.value();
+			auto timestamp_optional = G->get_attrib_timestamp_by_name(node, att);
+			if (timestamp_optional.has_value()){
+				auto timestamp = timestamp_optional.value();
+				std::cout << " time: " << timestamp << " ";
+			}
+		}
+	}
+	std::cout << std::endl;
+	}
+	else {
+		std::cout << __FUNCTION__ << " - " << new_timestamp << "#MNA%" << id;
+		for (const auto &att : att_names)
+			std::cout << "%" << att;
+		std::cout << std::endl;
+	}
+}
+
 void SpecificWorker::modify_edge_slot(std::uint64_t from, std::uint64_t to,  const std::string &type){
-
-	std::cout << "Modify edge slot" << std::endl;
+	const auto time_now = std::chrono::system_clock::now();
+	auto new_timestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(time_now.time_since_epoch()).count();
+	
+	if (!string_check_flag)
+		std::cout << "Modify edge slot - from_id: " << from << " to_id: " << to << " type: " << type << std::endl;
+	else
+		std::cout << __FUNCTION__ << " - " << new_timestamp << "#ME%" << from << "%" << to << "%" << type << std::endl;
 }
+
 void SpecificWorker::modify_edge_attrs_slot(std::uint64_t from, std::uint64_t to, const std::string &type, const std::vector<std::string>& att_names){
-
-	std::cout << "Modify edge attrs slot" << std::endl;
+	const auto time_now = std::chrono::system_clock::now();
+	auto new_timestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(time_now.time_since_epoch()).count();
+	
+	if (!string_check_flag){
+		std::cout << "Modify edge attrs slot - from_id: " << from << " to_id: " << to << " type: " << type; 
+		std::cout << "\n att_names_size: " << att_names.size() << " att_names: ";
+		for (const auto &att : att_names) std::cout << att << " ";
+		std::cout << std::endl;
+	}
+	else{
+		std::cout << __FUNCTION__ << " - " << new_timestamp << "#MEA%" << from << "%" << to << "%" << type;
+		for (const auto &att : att_names)
+			std::cout << "%" << att;
+		std::cout << std::endl;
+	}
 }
+
 void SpecificWorker::del_edge_slot(std::uint64_t from, std::uint64_t to, const std::string &edge_tag){
-
-	std::cout << "Delete edge slot" << std::endl;
+	const auto time_now = std::chrono::system_clock::now();
+	auto new_timestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(time_now.time_since_epoch()).count();
+	
+	if (!string_check_flag)
+		std::cout << "Delete edge slot" << std::endl;
+	else
+		std::cout << __FUNCTION__ << " - " << new_timestamp << "#DE%" << from << "%" << to << "%" << edge_tag << std::endl;
 }
-void SpecificWorker::del_node_slot(std::uint64_t from){
 
-	std::cout << "Delete node slot" << std::endl;
+void SpecificWorker::del_node_slot(std::uint64_t from){
+	const auto time_now = std::chrono::system_clock::now();
+	auto new_timestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(time_now.time_since_epoch()).count();
+	
+	if (!string_check_flag)
+		std::cout << "Delete node slot" << std::endl;
+	else
+		std::cout << __FUNCTION__ << " - " << new_timestamp << "#DN%" << from << std::endl;
 }

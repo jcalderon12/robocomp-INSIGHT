@@ -32,6 +32,8 @@
 //#define HIBERNATION_ENABLED
 
 #include <genericworker.h>
+#include "DSRTypeTrait.tpp"
+
 
 
 /**
@@ -87,8 +89,8 @@ public slots:
 	void modify_node_attrs_slot(std::uint64_t id, const std::vector<std::string>& att_names);
 	void modify_edge_slot(std::uint64_t from, std::uint64_t to,  const std::string &type);
 	void modify_edge_attrs_slot(std::uint64_t from, std::uint64_t to, const std::string &type, const std::vector<std::string>& att_names);
-	void del_edge_slot(std::uint64_t from, std::uint64_t to, const std::string &edge_tag);
 	void del_node_slot(std::uint64_t from);     
+	void del_edge_slot(std::uint64_t from, std::uint64_t to, const std::string &edge_tag);
 
 private:
 
@@ -97,16 +99,46 @@ private:
      */
 	bool startup_check_flag;
 
+	/**
+	 *
+	 */
 	bool string_check_flag = true;
 
+	/**
+	 *
+	 */
 	using AttributeType = std::variant<std::string, int32_t, float,
             		std::vector<float>, bool, std::vector<uint8_t>,
 					uint32_t, uint64_t, double, std::vector<uint64_t>,
 					std::array<float, 2>, std::array<float, 3>,
             		std::array<float, 4>, std::array<float, 6>>;
+	/**
+	 *
+	 */
+	struct SpecialChars {
+		const char SLOT = '#';
+		const char ATT_NAME = '$';
+		const char ATT_TYPE = ':';
+		const char ATT_VAL = '%';
+		const char K_DIV = '@';
 
-	std::string value_to_string(const AttributeType &att_value);
-	std::string attribute_value_to_string(const auto &value);
+		const std::string K = "K";
+		const std::string MN = "MN";
+		const std::string MNA = "MNA";
+		const std::string ME = "ME";
+		const std::string MEA = "MEA";
+		const std::string DN = "DN";
+		const std::string DE = "DE";
+	} SChars;
+
+
+	
+	std::optional<std::string> assemble_string(const auto &timestamp, const std::string &slot, 
+				const std::variant<std::uint64_t, std::tuple<uint64_t, uint64_t>> &id_variant,		
+				const std::string &type, const std::vector<std::string> &att_names);	
+
+
+	std::tuple<std::string, std::string> attribute_value_and_type_to_string(const auto &value);
 
 signals:
 	//void customSignal();

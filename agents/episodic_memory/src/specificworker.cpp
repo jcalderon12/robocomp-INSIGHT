@@ -94,6 +94,22 @@ void SpecificWorker::initialize()
     /////////GET PARAMS, OPEND DEVICES....////////
     //int period = configLoader.get<int>("Period.Compute") //NOTE: If you want get period of compute use getPeriod("compute")
     //std::string device = configLoader.get<std::string>("Device.name") 
+	
+	// - DECODE TEST
+	// std::string data = "pos_x$i:289%pos_y$f:38,000555200#possad$i:285559%pos_asdsady$f:35558,000555200#";
+    // std::cout << "Procesando string: " << data << "\n\n";
+
+    // auto it = data.begin();
+    // auto end = data.end();
+	
+	// std::cout<< "ssssssssssssssssss"<<std::endl;
+    // decode_string(it, end);
+	// std::cout<< "ssssssssssssssssss"<<std::endl;
+    // decode_string(it, end);
+	// std::cout<< "ssssssssssssssssss"<<std::endl;
+    // decode_string(it, end);
+	// std::cout<< "ssssssssssssssssss"<<std::endl;
+	// - DECODE TEST
 
 }
 
@@ -143,12 +159,10 @@ void SpecificWorker::modify_node_slot(std::uint64_t id, const std::string &type)
 		std::cout << "new_timestamp: " << new_timestamp << std::endl;
 	}
 	else { 
-		auto optional_node = G->get_node(id);
-		if (!optional_node.has_value()){
-			std::cout << __FUNCTION__ << " - optional_node has no value"; return; }
-
-		auto node = optional_node.value();
-		std::cout << __FUNCTION__ << " - " << new_timestamp << "#MN%" << id << "%" << type << "%" << node.name() << std::endl;
+		auto dsr_data_optional = assemble_string(new_timestamp, SChars.MN, id, type, {});
+		if (!dsr_data_optional.has_value()) {std::cerr << __FUNCTION__ << " - dsr_data_optional has no value" << std::endl; return;}
+		auto dsr_data = dsr_data_optional.value();
+		std::cout << __FUNCTION__ << " - " << dsr_data << std::endl;
 	}			
 }
 
@@ -175,18 +189,9 @@ void SpecificWorker::modify_node_attrs_slot(std::uint64_t id, const std::vector<
 		std::cout << std::endl;
 	}
 	else {
-		std::string dsr_data = "";
-		dsr_data += std::to_string(new_timestamp); dsr_data += "#MNA%"; dsr_data += std::to_string(id);
-		auto node_optional = G->get_node(id);
-		if(!node_optional.has_value()){std::cerr << __FUNCTION__ << "node_optional has no value" << std::endl; return;}
-		auto node = node_optional.value();
-		for (const auto &att_name : att_names){
-			if (att_name.size() > 0){
-				auto att = node.attrs()[att_name];
-				std::string att_value_str = attribute_value_to_string(att);
-				dsr_data += "%"; dsr_data += att_value_str;
-			}
-		}			
+		auto dsr_data_optional = assemble_string(new_timestamp, SChars.MNA, id, "", att_names); // no type/tag
+		if (!dsr_data_optional.has_value()) {std::cerr << __FUNCTION__ << " - dsr_data_optional has no value" << std::endl; return;}
+		auto dsr_data = dsr_data_optional.value();
 		std::cout << __FUNCTION__ << " - " << dsr_data << std::endl;
 	}
 }
@@ -198,7 +203,12 @@ void SpecificWorker::modify_edge_slot(std::uint64_t from, std::uint64_t to,  con
 	if (!string_check_flag)
 		std::cout << "Modify edge slot - from_id: " << from << " to_id: " << to << " type: " << type << std::endl;
 	else
-		std::cout << __FUNCTION__ << " - " << new_timestamp << "#ME%" << from << "%" << to << "%" << type << std::endl;
+	{
+		auto dsr_data_optional = assemble_string(new_timestamp, SChars.ME, std::make_tuple(from, to), type, {});
+		if (!dsr_data_optional.has_value()) {std::cerr << __FUNCTION__ << " - dsr_data_optional has no value" << std::endl; return;}
+		auto dsr_data = dsr_data_optional.value();
+		std::cout << __FUNCTION__ << " - " << dsr_data << std::endl;
+	}
 }
 
 void SpecificWorker::modify_edge_attrs_slot(std::uint64_t from, std::uint64_t to, const std::string &type, const std::vector<std::string>& att_names){
@@ -212,10 +222,10 @@ void SpecificWorker::modify_edge_attrs_slot(std::uint64_t from, std::uint64_t to
 		std::cout << std::endl;
 	}
 	else{
-		std::cout << __FUNCTION__ << " - " << new_timestamp << "#MEA%" << from << "%" << to << "%" << type;
-		for (const auto &att : att_names)
-			std::cout << "%" << att;
-		std::cout << std::endl;
+		auto dsr_data_optional = assemble_string(new_timestamp, SChars.MEA, std::make_tuple(from, to), type, att_names);
+		if (!dsr_data_optional.has_value()) {std::cerr << __FUNCTION__ << " - dsr_data_optional has no value" << std::endl; return;}
+		auto dsr_data = dsr_data_optional.value();
+		std::cout << __FUNCTION__ << " - " << dsr_data << std::endl;		
 	}
 }
 
@@ -225,8 +235,12 @@ void SpecificWorker::del_edge_slot(std::uint64_t from, std::uint64_t to, const s
 	
 	if (!string_check_flag)
 		std::cout << "Delete edge slot" << std::endl;
-	else
-		std::cout << __FUNCTION__ << " - " << new_timestamp << "#DE%" << from << "%" << to << "%" << edge_tag << std::endl;
+	else{
+		auto dsr_data_optional = assemble_string(new_timestamp, SChars.DE, std::make_tuple(from, to), edge_tag, {});
+		if (!dsr_data_optional.has_value()) {std::cerr << __FUNCTION__ << " - dsr_data_optional has no value" << std::endl; return;}
+		auto dsr_data = dsr_data_optional.value();
+		std::cout << __FUNCTION__ << " - " << dsr_data << std::endl;
+	}
 }
 
 void SpecificWorker::del_node_slot(std::uint64_t from){
@@ -235,81 +249,113 @@ void SpecificWorker::del_node_slot(std::uint64_t from){
 	
 	if (!string_check_flag)
 		std::cout << "Delete node slot" << std::endl;
-	else
-		std::cout << __FUNCTION__ << " - " << new_timestamp << "#DN%" << from << std::endl;
+	else{
+		auto dsr_data_optional = assemble_string(new_timestamp, SChars.DN, from, "", {});
+		if (!dsr_data_optional.has_value()) {std::cerr << __FUNCTION__ << " - dsr_data_optional has no value" << std::endl; return;}
+		auto dsr_data = dsr_data_optional.value();
+		std::cout << __FUNCTION__ << " - " << dsr_data << std::endl;
+	}
 }
 
 
-std::string SpecificWorker::value_to_string(const AttributeType &value){
-	return std::visit([](const auto &value) -> std::string {
-		using T = std::decay_t<decltype(value)>;
-		if constexpr (std::is_same_v<T, std::string>)
-			return value;
+std::tuple<std::string, std::string> SpecificWorker::attribute_value_and_type_to_string(const auto &att) {
+    return std::visit([](const auto& value) -> std::tuple<std::string, std::string> {
+        using T = std::decay_t<decltype(value)>;
+        
+        if constexpr (std::is_same_v<T, std::string>)
+			return {value, DSRTypeTrait<T>::code};
 		else if constexpr (std::is_arithmetic_v<T>)
-			return std::to_string(value);
+			return {std::to_string(value), DSRTypeTrait<T>::code};
 		else {
 			std::string out = "[";
 			bool first = true;
 			for (const auto &x : value) {
-				if (!first) out += ", ";
+				if (!first) out += ",";
 				out += std::to_string(x);
 				first = false;
 			}
 			out += "]";
-			return out;
+			return {out, DSRTypeTrait<T>::code};
 		}
-	}, value);
+    }, att.value());
 }
 
 
-std::string SpecificWorker::attribute_value_to_string(const auto &att) {
-    std::string att_value_str;
+std::optional<std::string> SpecificWorker::assemble_string(const auto &timestamp, const std::string &slot, const std::variant<std::uint64_t, std::tuple<uint64_t, uint64_t>> &id_variant,
+			const std::string &type, const std::vector<std::string> &att_names)
+{
+	constexpr uint64_t NODE_ONLY = -1;
+	uint64_t id_node, id_from, id_to;
+	std::optional<DSR::Node> node_optional;
+	std::optional<DSR::Edge> edge_optional;
+	DSR::Node node;
+	DSR::Edge edge;
 
-    switch (att.value().index()) {
-        case DSR::Types::STRING:
-            att_value_str += value_to_string(std::get<std::string>(att.value()));
-            break;
-        case DSR::Types::INT:
-            att_value_str += value_to_string(std::get<int32_t>(att.value()));
-            break;
-        case DSR::Types::FLOAT:
-            att_value_str += value_to_string(std::get<float>(att.value()));
-            break;
-        case DSR::Types::FLOAT_VEC:
-            att_value_str += value_to_string(std::get<std::vector<float>>(att.value()));
-            break;
-        case DSR::Types::BOOL:
-            att_value_str += value_to_string(std::get<bool>(att.value()));
-            break;
-        case DSR::Types::BYTE_VEC:
-            att_value_str += value_to_string(std::get<std::vector<uint8_t>>(att.value()));
-            break;
-        case DSR::Types::UINT:
-            att_value_str += value_to_string(std::get<uint32_t>(att.value()));
-            break;
-        case DSR::Types::UINT64:
-            att_value_str += value_to_string(std::get<uint64_t>(att.value()));
-            break;
-        case DSR::Types::DOUBLE:
-            att_value_str += value_to_string(std::get<double>(att.value()));
-            break;
-        case DSR::Types::U64_VEC:
-            att_value_str += value_to_string(std::get<std::vector<uint64_t>>(att.value()));
-            break;
-        case DSR::Types::VEC2:
-            att_value_str += value_to_string(std::get<std::array<float, 2>>(att.value()));
-            break;
-        case DSR::Types::VEC3:
-            att_value_str += value_to_string(std::get<std::array<float, 3>>(att.value()));
-            break;
-        case DSR::Types::VEC4:
-            att_value_str += value_to_string(std::get<std::array<float, 4>>(att.value()));
-            break;
-        case DSR::Types::VEC6:
-            att_value_str += value_to_string(std::get<std::array<float, 6>>(att.value()));
-            break;
-    }
+	// timestamp + slot 
+	std::string dsr_data = "";
+	dsr_data += std::to_string(timestamp); dsr_data += SChars.SLOT; 
+	dsr_data += slot; dsr_data += SChars.SLOT;
 
-    return att_value_str;
+	// id: node / edge
+	auto id_tuple = std::visit([NODE_ONLY](const auto &value) -> std::tuple<uint64_t, uint64_t> {
+		using T = std::decay_t<decltype(value)>;
+		if constexpr (std::is_same_v<T, std::uint64_t>)
+			return {value, NODE_ONLY};
+		else
+			return {std::get<0>(value), std::get<1>(value)};
+	}, id_variant);
+	
+	if(std::get<1>(id_tuple) == NODE_ONLY){ // Node
+		id_node = std::get<0>(id_tuple);
+		dsr_data += "id"; dsr_data += SChars.ATT_NAME;
+		dsr_data += std::to_string(id_node); dsr_data += SChars.ATT_VAL;	
+		
+		node_optional = G->get_node(id_node);
+		if(node_optional.has_value())
+			node = node_optional.value();
+	}
+	else{ // Edge
+		id_from = std::get<0>(id_tuple);
+		id_to = std::get<1>(id_tuple);
+		dsr_data += "idf"; dsr_data += SChars.ATT_NAME;
+		dsr_data += std::to_string(id_from); dsr_data += SChars.ATT_VAL;
+		dsr_data += "idt"; dsr_data += SChars.ATT_NAME;
+		dsr_data += std::to_string(id_to); dsr_data += SChars.ATT_VAL;
+		
+		if(slot != SChars.DE)
+			edge_optional = G->get_edge(id_from, id_to, type);
+		if(edge_optional.has_value())
+			edge = edge_optional.value();
+	}
+	
+	// type: node / edge - also tag: edge (when deleted) 
+	if (!type.empty())
+		{dsr_data += type; dsr_data += SChars.ATT_VAL;}
+	// name: node
+	if (slot == SChars.MN && node_optional.has_value())
+		{auto node = node_optional.value(); dsr_data += node.name(); dsr_data += SChars.ATT_VAL;} 
+
+	if(!att_names.empty()){
+		for (const auto &att_name : att_names){
+			if (att_name.size() > 0){
+				if(node_optional.has_value()){ // Node
+					auto att = node.attrs()[att_name];
+					auto att_val_type = attribute_value_and_type_to_string(att);
+					dsr_data += att_name; dsr_data += SChars.ATT_NAME; 
+					dsr_data += std::get<1>(att_val_type); dsr_data += SChars.ATT_TYPE;
+					dsr_data += std::get<0>(att_val_type); dsr_data += SChars.ATT_VAL;
+				}
+				else if(edge_optional.has_value()) { // Edge
+					auto att = edge.attrs()[att_name];
+					auto att_val_type = attribute_value_and_type_to_string(att);
+					dsr_data += att_name; dsr_data += SChars.ATT_NAME;
+					dsr_data += std::get<1>(att_val_type); dsr_data += SChars.ATT_TYPE;
+					dsr_data += std::get<0>(att_val_type); dsr_data += SChars.ATT_VAL;
+				}
+			}
+		}
+	}
+	dsr_data.back() = SChars.SLOT;
+	
+	return std::make_optional(std::move(dsr_data));
 }
-
